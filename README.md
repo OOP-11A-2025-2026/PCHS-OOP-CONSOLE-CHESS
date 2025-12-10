@@ -70,3 +70,7 @@ src/
 - `enums/` stores shared types for clarity.
 - `game/` handles player turns, rules enforcement, and game state.
 - `utils/` contains helper classes for algebraic notation and PGN file handling.
+
+---
+## State diagram
+![Diagram](images/console-chess-state-diagram.drawio.png)
