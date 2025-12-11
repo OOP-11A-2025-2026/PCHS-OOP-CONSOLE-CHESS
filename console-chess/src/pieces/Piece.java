@@ -41,5 +41,6 @@ public abstract class Piece {
 
     // Every piece must implement how it generates legal moves
     public abstract java.util.List<Move> getLegalMoves(Board board);
+    public abstract Piece copy();
 }
 

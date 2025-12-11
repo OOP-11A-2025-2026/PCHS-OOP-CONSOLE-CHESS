@@ -8,6 +8,8 @@ public class Queen extends Piece {
     {
         super(color, PieceType.QUEEN, file, rank);
     }
+
+    @Override
     public List<Move> getLegalMoves(Board board)
     {
         List<Move> moves = new ArrayList<>();
@@ -38,5 +40,10 @@ public class Queen extends Piece {
             }
         }
         return moves;
+    }
+
+    @Override
+    public Piece copy() {
+        return new Queen(this.color, this.file, this.rank);
     }
 }

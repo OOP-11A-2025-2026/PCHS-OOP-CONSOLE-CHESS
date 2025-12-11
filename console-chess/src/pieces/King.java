@@ -10,6 +10,8 @@ public class King extends Piece
     {
         super(color, PieceType.KING, file, rank);
     }
+
+    @Override
     public List<Move> getLegalMoves(Board board)
     {
         List<Move> moves = new ArrayList<>();
@@ -64,6 +66,7 @@ public class King extends Piece
         }
         return moves;
     }
+
     private Color opposite()
     {
         return(color == Color.WHITE)?Color.BLACK:Color.WHITE;
@@ -71,5 +74,10 @@ public class King extends Piece
     public void setHasMoved(boolean value)
     {
         this.hasMoved = value;
+    }
+
+    @Override
+    public Piece copy() {
+        return new King(this.color, this.file, this.rank);
     }
 }

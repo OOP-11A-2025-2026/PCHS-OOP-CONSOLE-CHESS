@@ -8,6 +8,8 @@ public class Knight extends Piece{
     {
         super(color, PieceType.KNIGHT, file, rank);
     }
+
+    @Override
     public List<Move> getLegalMoves(Board board)
     {
         List<Move> moves = new ArrayList<>();
@@ -26,5 +28,10 @@ public class Knight extends Piece{
             }
         }
         return moves;
+    }
+
+    @Override
+    public Piece copy() {
+        return new Knight(this.color, this.file, this.rank);
     }
 }

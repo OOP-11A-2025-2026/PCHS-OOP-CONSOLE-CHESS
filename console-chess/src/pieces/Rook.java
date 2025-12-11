@@ -7,6 +7,8 @@ public class Rook extends Piece{
     public Rook(Color color, int file, int rank) {
         super(color, PieceType.ROOK, file, rank);
     }
+
+    @Override
     public List<Move> getLegalMoves(Board board)
     {
         List<Move> moves = new ArrayList<>();
@@ -39,4 +41,8 @@ public class Rook extends Piece{
         return moves;
     }
 
+    @Override
+    public Piece copy() {
+        return new Rook(this.color, this.file, this.rank);
+    }
 }

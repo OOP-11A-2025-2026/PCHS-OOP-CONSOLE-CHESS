@@ -12,6 +12,8 @@ public class Pawn extends Piece{
     {
         super(color, PieceType.PAWN, file, rank);
     }
+
+    @Override
     public List<Move> getLegalMoves(Board board)
     {
         List<Move> moves = new ArrayList<>();
@@ -46,5 +48,10 @@ public class Pawn extends Piece{
             }
         }
         return moves;
+    }
+
+    @Override
+    public Piece copy() {
+        return new Pawn(this.color, this.file, this.rank);
     }
 }

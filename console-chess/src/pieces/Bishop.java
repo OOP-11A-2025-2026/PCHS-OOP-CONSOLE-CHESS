@@ -9,6 +9,7 @@ public class Bishop extends Piece {
         super(color, PieceType.BISHOP, file, rank);
     }
 
+    @Override
     public List<Move> getLegalMoves(Board board)
     {
         List<Move> moves = new ArrayList<>();
@@ -40,4 +41,10 @@ public class Bishop extends Piece {
         }
         return moves;
     }
+
+    @Override
+    public Piece copy() {
+        return new Bishop(this.color, this.file, this.rank);
+    }
+
 }
