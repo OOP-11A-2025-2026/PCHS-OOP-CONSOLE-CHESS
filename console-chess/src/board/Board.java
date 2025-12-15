@@ -56,13 +56,24 @@ public class Board {
 
     public Board clone() {
         Board b = new Board();
+        b.squares = new Piece[8][8];
+
         for (int r = 0; r < 8; r++) {
             for (int f = 0; f < 8; f++) {
-                b.squares[r][f] = this.squares[r][f];
+                Piece p = this.squares[r][f];
+                if (p != null)
+                    b.squares[r][f] = p.copy();
             }
         }
+        if (this.lastMove != null)
+            b.lastMove = new Move(
+                    new Square(lastMove.getFrom().getFile(), lastMove.getFrom().getRank()),
+                    new Square(lastMove.getTo().getFile(), lastMove.getTo().getRank())
+            );
+
         return b;
     }
+
 
     private Move lastMove = null;
 

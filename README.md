@@ -11,20 +11,57 @@ CLI chess made by dummies
 - Stores color, type, and position.
 - Each subclass (`Pawn`, `Rook`, `Knight`, `Bishop`, `Queen`, `King`) should implement `getLegalMoves()` to generate all possible valid moves from it's current position.
 
+---
+
 **Board**
-- Represents the chessboard as a `Piece[][]` array.
-- `null` indicates empty squares.
+
+Represents the physical chessboard as an 8×8 `Piece[][]` grid.
+Each cell either holds a Piece or `null` for empty squares.
+
+The `Board` is responsible for:
+
+- Placing and retrieving pieces
+
+- Applying moves (including special moves like en passant)
+
+- Checking bounds, paths, and attacks
+
+- Cloning itself for move validation without mutating the real game state
+
+---
 
 **Move**
 - Represents a move with `from` and `to` squares.
 
+---
+
 **Square**
 - Represents a square on the board with file and rank.
 
+---
 
 **Enums**
 - **Color:** `WHITE` or `BLACK`.
 - **PieceType:** `PAWN`, `ROOK`, `KNIGHT`, `BISHOP`, `QUEEN`, `KING`.
+
+---
+
+**Game**
+
+Acts as the main game controller and rule enforcer.
+It manages the current player, game state, and high-level flow of the match.
+
+The `Game` class is responsible for:
+
+- Starting and controlling a chess session
+
+- Validating and executing player moves
+
+- Preventing illegal moves and self-check
+
+- Detecting check, checkmate, stalemate, draw, and resignation
+
+- Switching turns and tracking draw offers
 
 ---
 
