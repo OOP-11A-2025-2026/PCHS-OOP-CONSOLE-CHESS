@@ -92,10 +92,24 @@ public class Board {
         setPieceAt(to, moving);
         setPieceAt(from, null);
         moving.setPosition(to.getFile(), to.getRank());
-
+        if (isPawnPromotion(moving, to)) {
+            Piece promoted =
+                PawnPromotionHandler.promote(moving.getColor(), to);
+            setPieceAt(to, promoted);
+        }
         lastMove = move;
         return captured;
     }
+    private boolean isPawnPromotion(Piece piece, Square to) {
+        if (piece == null) return false;
+        if (piece.getType() != PieceType.PAWN) return false;
+
+        if (piece.getColor() == Color.WHITE && to.getRank() == 7) return true;
+        if (piece.getColor() == Color.BLACK && to.getRank() == 0) return true;
+
+        return false;
+    }
+
 
     public boolean isSquareAttacked(Square target, Color byColor) {
         if (target == null) return false;
