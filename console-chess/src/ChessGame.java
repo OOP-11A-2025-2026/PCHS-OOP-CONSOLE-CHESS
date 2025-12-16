@@ -1,9 +1,6 @@
 import board.Board;
 import board.Square;
-import cli.PieceRenderer;
 import cli.BoardPrinter;
-import pieces.Piece;
-import enums.PieceType;
 import enums.Color;
 import pieces.Rook;
 
