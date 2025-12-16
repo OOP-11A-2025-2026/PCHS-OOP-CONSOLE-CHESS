@@ -182,5 +182,43 @@ public class Board {
         return false;
     }
 
+    /**
+     * Simulate the given move on a clone of this board and detect whether
+     * the moving side's king would be left in check.
+     *
+     * @param move the move to simulate
+     * @param movingColor the color performing the move
+     * @return true if after applying the move the moving side's king is under attack
+     */
+    public boolean simulateMoveAndDetectSelfCheck(Move move, Color movingColor) {
+        if (move == null || movingColor == null) return false;
+        Board copy = this.clone();
+
+        Square from = move.getFrom();
+        Square to = move.getTo();
+        if (from == null || to == null) return false;
+        Move copyMove = new Move(new Square(from.getFile(), from.getRank()), new Square(to.getFile(), to.getRank()));
+
+        copy.applyMove(copyMove);
+
+        Square kingSquare = null;
+        for (int r = 0; r < 8 && kingSquare == null; r++) {
+            for (int f = 0; f < 8; f++) {
+                Piece p = copy.getPieceAt(new Square(f, r));
+                if (p != null && p.getColor() == movingColor && p.getType() == PieceType.KING) {
+                    kingSquare = new Square(f, r);
+                    break;
+                }
+            }
+        }
+
+        if (kingSquare == null) {
+            return false;
+        }
+
+        Color opponent = (movingColor == Color.WHITE) ? Color.BLACK : Color.WHITE;
+        return copy.isSquareAttacked(kingSquare, opponent);
+    }
+
 
 }
