@@ -17,10 +17,35 @@ public class Square {
         return rank;
     }
 
+    public static Square fromString(String s) {
+        if (s == null || s.length() != 2) return null;
+
+        char f = s.charAt(0); // 'a'..'h'
+        char r = s.charAt(1); // '1'..'8'
+
+        int file = f - 'a';
+        int rank = r - '1';
+
+        if (file < 0 || file > 7 || rank < 0 || rank > 7) return null;
+
+        return new Square(file, rank);
+    }
     @Override
     public String toString() {
         char fileChar = (char) ('a' + file);
         int rankNum = rank + 1;
         return "" + fileChar + rankNum;
+    }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Square)) return false;
+        Square other = (Square) obj;
+        return file == other.file && rank == other.rank;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * file + rank;
     }
 }
