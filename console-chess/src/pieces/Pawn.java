@@ -42,9 +42,24 @@ public class Pawn extends Piece{
             {
                 moves.add(new Move(from, diag));
             }
-            if(target==null && board.getLastMove()!=null)
-            {
-                moves.add(new Move(from, diag));
+            if (target == null && board.getLastMove() != null) {
+                Move lm = board.getLastMove();
+                Square lmFrom = lm.getFrom();
+                Square lmTo = lm.getTo();
+                if (lmFrom != null && lmTo != null) {
+                    Piece lastMoved = board.getPieceAt(lmTo);
+                    if (lastMoved != null && lastMoved.getType() == PieceType.PAWN) {
+                        if (Math.abs(lmTo.getRank() - lmFrom.getRank()) == 2) {
+                            int passedRank = (lmFrom.getRank() + lmTo.getRank()) / 2;
+                            Square passedOver = new Square(lmTo.getFile(), passedRank);
+                            if (passedOver.getFile() == diag.getFile() && passedOver.getRank() == diag.getRank()) {
+                                if (lmTo.getRank() == from.getRank() && Math.abs(lmTo.getFile() - from.getFile()) == 1) {
+                                    moves.add(new Move(from, diag));
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         return moves;

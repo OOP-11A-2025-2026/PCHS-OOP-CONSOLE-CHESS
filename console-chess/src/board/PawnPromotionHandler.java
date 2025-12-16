@@ -1,9 +1,8 @@
 package board;
 
 import enums.Color;
-import pieces.*;
-
 import java.util.Scanner;
+import pieces.*;
 
 public class PawnPromotionHandler {
 
