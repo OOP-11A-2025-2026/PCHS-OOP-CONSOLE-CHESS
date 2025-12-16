@@ -5,13 +5,15 @@ import board.Move;
 import board.Square;
 import enums.Color;
 import enums.PieceType;
-import pieces.Piece;
-import pieces.King;
-import pieces.Rook;
-import pieces.Knight;
+import java.util.ArrayList;
+import java.util.List;
 import pieces.Bishop;
-import pieces.Queen;
+import pieces.King;
+import pieces.Knight;
 import pieces.Pawn;
+import pieces.Piece;
+import pieces.Queen;
+import pieces.Rook;
 
 public class Game {
     private Board board;
@@ -19,6 +21,7 @@ public class Game {
     private GameState state;
     private boolean drawOffered;
     private Color drawOfferedBy;
+    private List<String> moveHistory = new ArrayList<>();
 
     public enum GameState {
         ONGOING,
@@ -69,6 +72,10 @@ public class Game {
 
     public Color getCurrentPlayer() {
         return currentPlayer;
+    }
+
+    public void setCurrentPlayer(Color color) {
+        this.currentPlayer = color;
     }
 
     public GameState getState() {
@@ -140,7 +147,11 @@ public class Game {
             return false;
         }
 
+        // Record move in SAN notation before applying
+        String san = moveToSAN(move, piece);
+        
         board.applyMove(move);
+        moveHistory.add(san);
 
         if (drawOffered && drawOfferedBy != currentPlayer) {
             declineDraw();
@@ -221,5 +232,63 @@ public class Game {
             return currentPlayer == Color.WHITE ? "Black" : "White";
         }
         return null;
+    }
+
+    public List<String> getMoveHistory() {
+        return new ArrayList<>(moveHistory);
+    }
+
+    public void setMoveHistory(List<String> history) {
+        this.moveHistory = new ArrayList<>(history);
+    }
+
+    private String moveToSAN(Move move, Piece piece) {
+        Square from = move.getFrom();
+        Square to = move.getTo();
+        StringBuilder sb = new StringBuilder();
+
+        if (piece.getType() == PieceType.KING && Math.abs(to.getFile() - from.getFile()) == 2) {
+            return to.getFile() > from.getFile() ? "O-O" : "O-O-O";
+        }
+
+        if (piece.getType() != PieceType.PAWN) {
+            sb.append(switch (piece.getType()) {
+                case KING -> 'K';
+                case QUEEN -> 'Q';
+                case ROOK -> 'R';
+                case BISHOP -> 'B';
+                case KNIGHT -> 'N';
+                default -> '?';
+            });
+        }
+
+        Piece target = board.getPieceAt(to);
+        boolean isCapture = target != null;
+        if (piece.getType() == PieceType.PAWN && from.getFile() != to.getFile() && target == null) {
+            isCapture = true;
+        }
+
+        if (piece.getType() == PieceType.PAWN && isCapture) {
+            sb.append((char) ('a' + from.getFile()));
+        }
+
+        if (isCapture) {
+            sb.append('x');
+        }
+
+        sb.append((char) ('a' + to.getFile()));
+        sb.append((char) ('1' + to.getRank()));
+
+        if (move.getPromotion() != null) {
+            sb.append('=').append(switch (move.getPromotion()) {
+                case QUEEN -> 'Q';
+                case ROOK -> 'R';
+                case BISHOP -> 'B';
+                case KNIGHT -> 'N';
+                default -> 'Q';
+            });
+        }
+
+        return sb.toString();
     }
 }
