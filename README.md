@@ -90,6 +90,58 @@ The `Board` is responsible for:
 
 ---
 
+**Input & Parsing**
+
+**Move parser**
+
+Handles all user input and converts it into a valid `Move`.
+
+Supported input formats:
+- Coordinate notation: `e2 e4`.
+- Basic algebraic notation: `e4`, `Nf3`
+
+How it works:
+- Coordinate notation: e2 e4
+- Analyzes the current board state
+- Finds the first move that matches the given input
+- Ignores check (`+`) and checkmate (`#`) symbols
+
+If the move is invalid or impossible, the parser returns `null`.
+
+---
+
+**Pawn Promotion Handler**
+
+Handles pawn promotion when a pawn reaches the last rank.
+
+When promotion occurs:
+- Displays a console menu
+- Prompts the player to choose a piece:
+  -  Queen
+  - Rook
+  - Bishop
+  - Knight
+- Creates and returns a new piece of the selected type
+
+The handler **guarantees a valid choice** and does not allow the game to continue
+until correct input is provided.
+
+---
+
+**Timer**
+
+**GameTimer**
+
+Provides real-time chess clock functionality.
+
+Features:
+- Each player starts with 10 minutes
+- Time decreases only for the player whose turn it is
+- Timer switches after every valid move
+- Runs in real time inside the console
+
+If a player runs out of time, the game **ends automatically**.
+
 **Game**
 
 Acts as the main game controller and rule enforcer.
@@ -117,7 +169,9 @@ src/
 ├── board/                    # board representation & state
 │   ├── Board.java
 │   ├── Square.java
-│   └── Move.java
+│   ├── Move.java
+│   ├── PawnPromotionHandler.java
+│   └── Square.java
 │
 ├── pieces/                   # piece classes
 │   ├── Piece.java            # abstract
@@ -132,14 +186,23 @@ src/
 │   ├── Color.java
 │   └── PieceType.java
 │
-├── game/       TO-DO              # game logic & controller
-│   (game logic, validation ect.)
+├── game/                     # game logic & controller
+│   └── Game.java
 │
-├── cli
+├── cli                       # visualization
 │   ├── ChessCLI.java   
+│   ├── PieceRenderer.java   
 │   └── BoardPrinter.java 
-└── utils/                    
-  (algebraic notation parser + pgn file stuff)
+│
+├── timer                     # timer logic
+│   └── GameTimer.java 
+│
+├── pgn                       # pgn logic
+│   ├── PGNExporter.java 
+│   └── PGNParser.java   
+│
+└── input/                    # algebraic notation parser
+    └── MoveParser.java 
   
 ```
 
@@ -150,7 +213,10 @@ src/
 - `pieces/` contains piece classes and their movement rules.
 - `enums/` stores shared types for clarity.
 - `game/` handles player turns, rules enforcement, and game state.
-- `utils/` contains helper classes for algebraic notation and PGN file handling.
+- `cli/` console interface and rendering
+- `timer/` real-time chess clock
+- `input/` user move parsing
+- `pgn/` saving and loading games
 
 ---
 ## State diagram
