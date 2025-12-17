@@ -3,13 +3,17 @@ package cli;
 import board.Board;
 import game.Game;
 import game.Game.GameState;
+import board.Move;
+import input.MoveParser;
+import enums.Color;
+import pgn.PGNExporter;
+import pgn.PGNParser;
+
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
-import pgn.PGNExporter;
-import pgn.PGNParser;
 
 public class ChessCLI {
 
@@ -32,7 +36,7 @@ public class ChessCLI {
             printSeparator(50);
             System.out.print("  > ");
 
-            String choice = scanner.nextLine();
+            String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1" -> startNewGame();
@@ -47,6 +51,11 @@ public class ChessCLI {
                 }
             }
         }
+    }
+
+    private void startNewGame() {
+        game = new Game();
+        gameLoop();
     }
 
     private void loadGame() {
@@ -74,24 +83,13 @@ public class ChessCLI {
 
             if (success) {
                 game.setMoveHistory(moves);
-                game.setCurrentPlayer(moves.size() % 2 == 0 ? enums.Color.WHITE : enums.Color.BLACK);
+                game.setCurrentPlayer(moves.size() % 2 == 0 ? Color.WHITE : Color.BLACK);
 
                 System.out.println("\n  Loaded " + filename + " successfully!");
                 System.out.println("  " + moves.size() + " moves applied.");
                 pause();
 
-                clearScreen();
-                printSeparator(60);
-                BoardPrinter.print(board);
-                printSeparator(60);
-                System.out.println("\n  Position loaded from: " + filename);
-                System.out.println("\n  Press Enter to continue to game, or type 'back' to return to menu.");
-                System.out.print("  > ");
-                String input = scanner.nextLine().trim().toLowerCase();
-
-                if (!input.equals("back")) {
-                    gameLoop();
-                }
+                gameLoop();
             } else {
                 System.out.println("\n  Failed to load PGN file. Check the file format.");
                 pause();
@@ -102,11 +100,7 @@ public class ChessCLI {
         }
     }
 
-    private void startNewGame() {
-        game = new Game();
-        gameLoop();
-    }
-
+    /* ================= GAME LOOP ================= */
     private void gameLoop() {
         while (true) {
             clearScreen();
@@ -117,81 +111,36 @@ public class ChessCLI {
             printGameStatus();
 
             if (isGameOver()) {
-                pause();
+                System.out.println("\n  Press Enter to return to main menu...");
+                scanner.nextLine();
                 return;
+            }
+
+            // Check if opponent needs to accept/decline a draw
+            if (game.isDrawOffered() && game.getDrawOfferedBy() != game.getCurrentPlayer()) {
+                handlePendingDrawOffer();
+                if (isGameOver()) {
+                    System.out.println("\n  Press Enter to return to main menu...");
+                    scanner.nextLine();
+                    return;
+                }
             }
 
             printTurnPrompt();
             printInGameMenu();
 
             System.out.print("\n  Enter move: ");
-            String input = scanner.nextLine();
+            String input = scanner.nextLine().trim();
 
             handleCommand(input);
         }
     }
 
-    private void printTurnPrompt() {
-        System.out.println();
-        printCentered(game.getCurrentPlayer() + " TO MOVE", 60);
-    }
-
-    private void printGameStatus() {
-        System.out.println();
-
-        switch (game.getState()) {
-            case CHECK ->
-                    printHighlight("CHECK!", 60);
-            case CHECKMATE ->
-                    printHighlight("CHECKMATE — " + game.getWinner() + " WINS!", 60);
-            case STALEMATE ->
-                    printHighlight("STALEMATE — DRAW", 60);
-            case DRAW ->
-                    printHighlight("DRAW AGREED", 60);
-            case RESIGNED ->
-                    printHighlight("GAME OVER — " + game.getWinner() + " WINS!", 60);
-        }
-
-        if (game.isDrawOffered()
-                && game.getDrawOfferedBy() != game.getCurrentPlayer()
-                && game.getState() == GameState.ONGOING) {
-
-            System.out.println();
-            printHighlight(
-                    "DRAW OFFERED BY " + game.getDrawOfferedBy(),
-                    60
-            );
-        }
-    }
-
-    private boolean isGameOver() {
-        GameState state = game.getState();
-        return state == GameState.CHECKMATE
-                || state == GameState.STALEMATE
-                || state == GameState.DRAW
-                || state == GameState.RESIGNED;
-    }
-
-
-    private void printInGameMenu() {
-        System.out.println();
-        printSeparator(60);
-        System.out.print("  Commands: [save] [resign]");
-
-        if (!game.isDrawOffered()) {
-            System.out.print(" [draw]");
-        }
-        else if (game.getDrawOfferedBy() != game.getCurrentPlayer()) {
-            System.out.print(" [accept] [decline]");
-        }
-
-        System.out.println();
-        printSeparator(60);
-    }
-
-
+    /* ================= COMMAND HANDLING ================= */
     private void handleCommand(String input) {
-        input = input.trim().toLowerCase();
+        if (input.isEmpty()) return;
+
+        input = input.toLowerCase();
 
         if (input.equals("save")) {
             saveGame();
@@ -204,28 +153,74 @@ public class ChessCLI {
         }
 
         if (input.equals("draw")) {
-            game.offerDraw();
-            System.out.println("\n  Draw offered.");
-            scanner.nextLine();
+            if (game.isDrawOffered()) {
+                System.out.println("\n  Draw already offered.");
+            } else {
+                game.offerDraw();
+                System.out.println("\n  Draw offered.");
+            }
+            pause();
             return;
         }
 
-        if (input.equals("accept")) {
-            game.acceptDraw();
-            return;
+        Move move = MoveParser.parse(input, game.getBoard(), game.getCurrentPlayer());
+        if (move == null || !game.makeMove(move)) {
+            System.out.println("\n  Illegal move!");
+            pause();
         }
-
-        if (input.equals("decline")) {
-            game.declineDraw();
-            return;
-        }
-
-        System.out.println("Invalid command.");
-        return;
     }
 
+    private void handlePendingDrawOffer() {
+        System.out.print("\n  Opponent offers a draw. Accept? (y/n): ");
+        String response = scanner.nextLine().trim().toLowerCase();
 
+        if (response.equals("y")) {
+            game.acceptDraw();
+            System.out.println("  Draw agreed.");
+            printGameStatus();
+        } else {
+            game.declineDraw();
+            System.out.println("  Draw declined.");
+        }
 
+        pause();
+    }
+
+    private void printTurnPrompt() {
+        System.out.println();
+        String player = game.getCurrentPlayer() == Color.WHITE ? "WHITE" : "BLACK";
+        printCentered(player + " TO MOVE", 60);
+    }
+
+    private void printGameStatus() {
+        System.out.println();
+        switch (game.getState()) {
+            case CHECK -> printHighlight("CHECK!", 60);
+            case CHECKMATE -> printHighlight("CHECKMATE — " + game.getWinner() + " WINS!", 60);
+            case STALEMATE -> printHighlight("STALEMATE — DRAW", 60);
+            case DRAW -> printHighlight("DRAW AGREED", 60);
+            case RESIGNED -> printHighlight("GAME OVER — " + game.getWinner() + " WINS!", 60);
+        }
+    }
+
+    private boolean isGameOver() {
+        GameState state = game.getState();
+        return state == GameState.CHECKMATE
+                || state == GameState.STALEMATE
+                || state == GameState.DRAW
+                || state == GameState.RESIGNED;
+    }
+
+    private void printInGameMenu() {
+        System.out.println();
+        printSeparator(60);
+        System.out.print("  Commands: [save] [resign]");
+        if (!game.isDrawOffered()) System.out.print(" [draw]");
+        System.out.println();
+        printSeparator(60);
+    }
+
+    /* ================== SAVE GAME ================== */
     private void saveGame() {
         System.out.print("\n  Enter filename to save (e.g., mygame.pgn): ");
         String filename = scanner.nextLine().trim();
@@ -236,9 +231,7 @@ public class ChessCLI {
             return;
         }
 
-        if (!filename.endsWith(".pgn")) {
-            filename += ".pgn";
-        }
+        if (!filename.endsWith(".pgn")) filename += ".pgn";
 
         try {
             Map<String, String> tags = new LinkedHashMap<>();
@@ -250,9 +243,9 @@ public class ChessCLI {
             tags.put("Black", "Player2");
 
             String result = switch (game.getState()) {
-                case CHECKMATE -> game.getCurrentPlayer() == enums.Color.WHITE ? "0-1" : "1-0";
+                case CHECKMATE -> game.getCurrentPlayer() == Color.WHITE ? "0-1" : "1-0";
                 case DRAW, STALEMATE -> "1/2-1/2";
-                case RESIGNED -> game.getCurrentPlayer() == enums.Color.WHITE ? "0-1" : "1-0";
+                case RESIGNED -> game.getCurrentPlayer() == Color.WHITE ? "0-1" : "1-0";
                 default -> "*";
             };
             tags.put("Result", result);
@@ -265,11 +258,7 @@ public class ChessCLI {
         pause();
     }
 
-    private void pause() {
-        System.out.print("\n  Press Enter to continue...");
-        scanner.nextLine();
-    }
-
+    /* ================== UI HELPERS ================== */
     private void printBox(String text, int width) {
         printSeparator(width);
         printCentered(text, width);
@@ -292,6 +281,11 @@ public class ChessCLI {
 
     private void printMenuOption(String number, String label) {
         System.out.printf("    %s. %s%n", number, label);
+    }
+
+    private void pause() {
+        System.out.print("\n  Press Enter to continue...");
+        scanner.nextLine();
     }
 
     private void clearScreen() {
