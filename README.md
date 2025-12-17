@@ -4,6 +4,48 @@ CLI chess made by dummies
 
 ---
 
+## How to Run
+
+**Requirements:**
+
+- Java JDK 11 or higher installed.
+
+- `make` utility (Linux, macOS, or Windows with WSL / Git Bash / MinGW).
+
+---
+
+**Compile and run:**
+
+<p style="color:LightSkyBlue">
+1. Open a terminal and navigate to the <code>project root</code> (the directory where the Makefile is)<br>
+2. To compile and run in <strong>one step</strong>, type:
+</p>
+```
+make
+```
+This will:
+
+- Compile all ``.java`` files from ``src/`` into the ``bin/`` directory.
+
+- Launch the chess game.
+
+---
+
+3. To **only compile** without running:
+```
+make compile
+```
+
+4. To **only run** after compilation:
+```
+make run
+```
+5. To **clean** all compiled files (remove bin/)
+```
+make clean
+```
+---
+
 ## ☆ Core Classes
 
 **Piece**
