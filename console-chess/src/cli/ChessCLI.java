@@ -1,13 +1,14 @@
 package cli;
 
 import board.Board;
+import board.Move;
+import enums.Color;
 import game.Game;
 import game.Game.GameState;
-import board.Move;
 import input.MoveParser;
-import enums.Color;
 import pgn.PGNExporter;
 import pgn.PGNParser;
+import timer.GameTimer;
 
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ public class ChessCLI {
 
     private final Scanner scanner = new Scanner(System.in);
     private Game game;
+    private GameTimer timer;
 
     public void start() {
         showMainMenu();
@@ -55,6 +57,8 @@ public class ChessCLI {
 
     private void startNewGame() {
         game = new Game();
+        timer = new GameTimer(10);
+        timer.start();
         gameLoop();
     }
 
@@ -85,6 +89,9 @@ public class ChessCLI {
                 game.setMoveHistory(moves);
                 game.setCurrentPlayer(moves.size() % 2 == 0 ? Color.WHITE : Color.BLACK);
 
+                timer = new GameTimer(10);
+                timer.start();
+
                 System.out.println("\n  Loaded " + filename + " successfully!");
                 System.out.println("  " + moves.size() + " moves applied.");
                 pause();
@@ -100,7 +107,6 @@ public class ChessCLI {
         }
     }
 
-    /* ================= GAME LOOP ================= */
     private void gameLoop() {
         while (true) {
             clearScreen();
@@ -109,6 +115,7 @@ public class ChessCLI {
             printSeparator(60);
 
             printGameStatus();
+            timer.printTime();
 
             if (isGameOver()) {
                 System.out.println("\n  Press Enter to return to main menu...");
@@ -116,7 +123,6 @@ public class ChessCLI {
                 return;
             }
 
-            // Check if opponent needs to accept/decline a draw
             if (game.isDrawOffered() && game.getDrawOfferedBy() != game.getCurrentPlayer()) {
                 handlePendingDrawOffer();
                 if (isGameOver()) {
@@ -136,23 +142,22 @@ public class ChessCLI {
         }
     }
 
-    /* ================= COMMAND HANDLING ================= */
     private void handleCommand(String input) {
         if (input.isEmpty()) return;
 
-        input = input.toLowerCase();
+        input = input.trim();
 
-        if (input.equals("save")) {
+        if (input.equalsIgnoreCase("save")) {
             saveGame();
             return;
         }
 
-        if (input.equals("resign")) {
+        if (input.equalsIgnoreCase("resign")) {
             game.resign();
             return;
         }
 
-        if (input.equals("draw")) {
+        if (input.equalsIgnoreCase("draw")) {
             if (game.isDrawOffered()) {
                 System.out.println("\n  Draw already offered.");
             } else {
@@ -167,6 +172,8 @@ public class ChessCLI {
         if (move == null || !game.makeMove(move)) {
             System.out.println("\n  Illegal move!");
             pause();
+        } else {
+            timer.switchTurn();
         }
     }
 
