@@ -6,15 +6,14 @@ import enums.Color;
 import game.Game;
 import game.Game.GameState;
 import input.MoveParser;
-import pgn.PGNExporter;
-import pgn.PGNParser;
-import timer.GameTimer;
-
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
+import pgn.PGNExporter;
+import pgn.PGNParser;
+import timer.GameTimer;
 
 public class ChessCLI {
 
@@ -273,7 +272,7 @@ public class ChessCLI {
     }
 
     private void printSeparator(int width) {
-        System.out.println("  " + "─".repeat(width));
+        System.out.println("  " + "-".repeat(width));
     }
 
     private void printCentered(String text, int width) {

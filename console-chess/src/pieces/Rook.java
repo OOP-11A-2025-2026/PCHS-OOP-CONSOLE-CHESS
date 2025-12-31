@@ -4,8 +4,18 @@ import enums.*;
 import java.util.*;
 
 public class Rook extends Piece{
+    private boolean hasMoved = false;
+    
     public Rook(Color color, int file, int rank) {
         super(color, PieceType.ROOK, file, rank);
+    }
+    
+    public boolean hasMoved() {
+        return hasMoved;
+    }
+    
+    public void setHasMoved(boolean value) {
+        this.hasMoved = value;
     }
 
     @Override
@@ -43,6 +53,8 @@ public class Rook extends Piece{
 
     @Override
     public Piece copy() {
-        return new Rook(this.color, this.file, this.rank);
+        Rook copy = new Rook(this.color, this.file, this.rank);
+        copy.setHasMoved(this.hasMoved);
+        return copy;
     }
 }

@@ -41,9 +41,11 @@ public class King extends Piece
             Square f = new Square(5, homeRank);
             Square g = new Square(6, homeRank);
             Square h = new Square(7, homeRank);
+            Piece rookH = board.getPieceAt(h);
             if(board.getPieceAt(f) == null &&
                     board.getPieceAt(g) == null &&
-                    board.getPieceAt(h) instanceof Rook &&
+                    rookH instanceof Rook &&
+                    !((Rook)rookH).hasMoved() &&
                     !board.isSquareAttacked(f, opposite()) &&
                     !board.isSquareAttacked(g, opposite()))
             {
@@ -53,14 +55,15 @@ public class King extends Piece
             Square c = new Square(2, homeRank);
             Square b = new Square(1, homeRank);
             Square a = new Square(0, homeRank);
+            Piece rookA = board.getPieceAt(a);
             if(board.getPieceAt(d) == null &&
                     board.getPieceAt(c) == null &&
                     board.getPieceAt(b) == null &&
-                    board.getPieceAt(a) instanceof Rook &&
+                    rookA instanceof Rook &&
+                    !((Rook)rookA).hasMoved() &&
                     !board.isSquareAttacked(d, opposite()) &&
                     !board.isSquareAttacked(c, opposite()))
             {
-
                 moves.add(new Move(from, c));
             }
         }
@@ -78,6 +81,8 @@ public class King extends Piece
 
     @Override
     public Piece copy() {
-        return new King(this.color, this.file, this.rank);
+        King copy = new King(this.color, this.file, this.rank);
+        copy.setHasMoved(this.hasMoved);
+        return copy;
     }
 }

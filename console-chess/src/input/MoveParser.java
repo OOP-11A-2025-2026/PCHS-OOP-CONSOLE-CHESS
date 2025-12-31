@@ -5,9 +5,8 @@ import board.Move;
 import board.Square;
 import enums.Color;
 import enums.PieceType;
-import pieces.Piece;
-
 import java.util.List;
+import pieces.Piece;
 
 public class MoveParser {
 
@@ -17,11 +16,40 @@ public class MoveParser {
         input = input.trim();
         input = input.replace("+", "").replace("#", "");
 
+        // Handle castling notation
+        if (input.equalsIgnoreCase("O-O-O") || input.equals("0-0-0")) {
+            return parseCastling(board, color, true); // Queenside (long)
+        }
+        if (input.equalsIgnoreCase("O-O") || input.equals("0-0")) {
+            return parseCastling(board, color, false); // Kingside (short)
+        }
+
         if (input.matches("[a-h][1-8]\\s+[a-h][1-8]")) {
             return parseSimple(input);
         }
 
         return parseAlgebraic(input, board, color);
+    }
+
+    private static Move parseCastling(Board board, Color color, boolean queenside) {
+        int homeRank = (color == Color.WHITE) ? 0 : 7;
+        Square kingFrom = new Square(4, homeRank);
+        
+        // Check if king is at starting position
+        Piece king = board.getPieceAt(kingFrom);
+        if (king == null || king.getType() != PieceType.KING || king.getColor() != color) {
+            return null;
+        }
+
+        // Determine target square for the king
+        Square kingTo;
+        if (queenside) {
+            kingTo = new Square(2, homeRank); // c1 or c8
+        } else {
+            kingTo = new Square(6, homeRank); // g1 or g8
+        }
+
+        return new Move(kingFrom, kingTo);
     }
 
 

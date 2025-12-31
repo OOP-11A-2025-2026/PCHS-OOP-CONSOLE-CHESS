@@ -104,6 +104,14 @@ public class Board {
         setPieceAt(from, null);
         moving.setPosition(to.getFile(), to.getRank());
 
+        // Track hasMoved for castling purposes
+        if (moving.getType() == PieceType.KING && moving instanceof pieces.King) {
+            ((pieces.King) moving).setHasMoved(true);
+        }
+        if (moving.getType() == PieceType.ROOK && moving instanceof pieces.Rook) {
+            ((pieces.Rook) moving).setHasMoved(true);
+        }
+
         if (moving.getType() == PieceType.KING) {
             int dx = to.getFile() - from.getFile();
             if (dx == 2) {
@@ -113,6 +121,9 @@ public class Board {
                     setPieceAt(new Square(5, rank), rook);
                     setPieceAt(new Square(7, rank), null);
                     rook.setPosition(5, rank);
+                    if (rook instanceof pieces.Rook) {
+                        ((pieces.Rook) rook).setHasMoved(true);
+                    }
                 }
             } else if (dx == -2) {
                 int rank = from.getRank();
@@ -121,6 +132,9 @@ public class Board {
                     setPieceAt(new Square(3, rank), rook);
                     setPieceAt(new Square(0, rank), null);
                     rook.setPosition(3, rank);
+                    if (rook instanceof pieces.Rook) {
+                        ((pieces.Rook) rook).setHasMoved(true);
+                    }
                 }
             }
         }

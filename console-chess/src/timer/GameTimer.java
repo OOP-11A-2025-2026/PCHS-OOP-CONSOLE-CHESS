@@ -24,7 +24,7 @@ public class GameTimer {
                 whiteTime--;
                 if(whiteTime <= 0)
                 {
-                    System.out.println("\n⏱ WHITE ran out of time!BLACK wins!");
+                    System.out.println("\n[!] WHITE ran out of time! BLACK wins!");
                     System.exit(0);
                 }
             }
@@ -33,7 +33,7 @@ public class GameTimer {
                 blackTime--;
                 if(blackTime<=0)
                 {
-                    System.out.println("\n⏱ BLACK ran out of time! WHITE wins!");
+                    System.out.println("\n[!] BLACK ran out of time! WHITE wins!");
                     System.exit(0);
                 }
             }
@@ -47,7 +47,7 @@ public class GameTimer {
     }
     public void printTime()
     {
-        System.out.printf("⏱ White: %s   Black: %s\n",format(whiteTime), format(blackTime));
+        System.out.printf("[T] White: %s   Black: %s\n",format(whiteTime), format(blackTime));
     }
     private String format(int seconds)
     {
