@@ -15,16 +15,28 @@ import pgn.PGNExporter;
 import pgn.PGNParser;
 import timer.GameTimer;
 
+/**
+ * Command Line Interface for the chess game.
+ * Handles user interaction, menu navigation, game display, and input processing.
+ */
 public class ChessCLI {
 
     private final Scanner scanner = new Scanner(System.in);
     private Game game;
     private GameTimer timer;
 
+    /**
+     * Starts the chess CLI application.
+     * Shows the main menu and handles navigation.
+     */
     public void start() {
         showMainMenu();
     }
 
+    /**
+     * Displays and handles the main menu.
+     * Options: New Game, Load Game, Exit
+     */
     private void showMainMenu() {
         while (true) {
             clearScreen();
@@ -54,6 +66,9 @@ public class ChessCLI {
         }
     }
 
+    /**
+     * Starts a new chess game with fresh board and timer.
+     */
     private void startNewGame() {
         game = new Game();
         timer = new GameTimer(10);
@@ -61,6 +76,10 @@ public class ChessCLI {
         gameLoop();
     }
 
+    /**
+     * Loads a game from a PGN file.
+     * Prompts user for filename and parses the PGN content.
+     */
     private void loadGame() {
         clearScreen();
         printBox("LOAD GAME", 50);
@@ -106,6 +125,10 @@ public class ChessCLI {
         }
     }
 
+    /**
+     * Main game loop that handles turns, input, and display.
+     * Continues until the game ends or player exits.
+     */
     private void gameLoop() {
         while (true) {
             clearScreen();
@@ -141,6 +164,12 @@ public class ChessCLI {
         }
     }
 
+    /**
+     * Processes user input commands and moves.
+     * Handles: save, resign, draw offers, and move input.
+     * 
+     * @param input The user's input string
+     */
     private void handleCommand(String input) {
         if (input.isEmpty()) return;
 
@@ -176,6 +205,10 @@ public class ChessCLI {
         }
     }
 
+    /**
+     * Handles a pending draw offer from the opponent.
+     * Prompts the current player to accept or decline.
+     */
     private void handlePendingDrawOffer() {
         System.out.print("\n  Opponent offers a draw. Accept? (y/n): ");
         String response = scanner.nextLine().trim().toLowerCase();
@@ -192,12 +225,18 @@ public class ChessCLI {
         pause();
     }
 
+    /**
+     * Prints which player's turn it is.
+     */
     private void printTurnPrompt() {
         System.out.println();
         String player = game.getCurrentPlayer() == Color.WHITE ? "WHITE" : "BLACK";
         printCentered(player + " TO MOVE", 60);
     }
 
+    /**
+     * Prints the current game status (check, checkmate, etc.).
+     */
     private void printGameStatus() {
         System.out.println();
         switch (game.getState()) {
@@ -209,6 +248,10 @@ public class ChessCLI {
         }
     }
 
+    /**
+     * Checks if the game has ended.
+     * @return true if the game is over (checkmate, stalemate, draw, or resigned)
+     */
     private boolean isGameOver() {
         GameState state = game.getState();
         return state == GameState.CHECKMATE
@@ -217,6 +260,9 @@ public class ChessCLI {
                 || state == GameState.RESIGNED;
     }
 
+    /**
+     * Prints the in-game command menu.
+     */
     private void printInGameMenu() {
         System.out.println();
         printSeparator(60);
@@ -226,6 +272,10 @@ public class ChessCLI {
         printSeparator(60);
     }
 
+    /**
+     * Saves the current game to a PGN file.
+     * Prompts user for filename and exports the game.
+     */
     /* ================== SAVE GAME ================== */
     private void saveGame() {
         System.out.print("\n  Enter filename to save (e.g., mygame.pgn): ");
@@ -265,35 +315,66 @@ public class ChessCLI {
     }
 
     /* ================== UI HELPERS ================== */
+    
+    /**
+     * Prints a text box with borders.
+     * @param text The text to display inside the box
+     * @param width The width of the box
+     */
     private void printBox(String text, int width) {
         printSeparator(width);
         printCentered(text, width);
         printSeparator(width);
     }
 
+    /**
+     * Prints a horizontal separator line.
+     * @param width The width of the separator
+     */
     private void printSeparator(int width) {
         System.out.println("  " + "-".repeat(width));
     }
 
+    /**
+     * Prints text centered within a specified width.
+     * @param text The text to center
+     * @param width The total width for centering
+     */
     private void printCentered(String text, int width) {
         int padding = (width - text.length()) / 2;
         System.out.println("  " + " ".repeat(Math.max(0, padding)) + text);
     }
 
+    /**
+     * Prints highlighted text with brackets.
+     * @param text The text to highlight
+     * @param width The total width for centering
+     */
     private void printHighlight(String text, int width) {
         int padding = (width - text.length() - 4) / 2;
         System.out.println("  " + " ".repeat(Math.max(0, padding)) + "[ " + text + " ]");
     }
 
+    /**
+     * Prints a numbered menu option.
+     * @param number The option number
+     * @param label The option description
+     */
     private void printMenuOption(String number, String label) {
         System.out.printf("    %s. %s%n", number, label);
     }
 
+    /**
+     * Pauses execution and waits for user to press Enter.
+     */
     private void pause() {
         System.out.print("\n  Press Enter to continue...");
         scanner.nextLine();
     }
 
+    /**
+     * Clears the console screen using ANSI escape codes.
+     */
     private void clearScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();

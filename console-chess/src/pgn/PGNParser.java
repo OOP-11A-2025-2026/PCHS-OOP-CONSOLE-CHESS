@@ -21,6 +21,13 @@ public class PGNParser {
 
     private static final Pattern TAG_PATTERN = Pattern.compile("\\[(\\w+)\\s+\"([^\"]*)\"\\]");
 
+    /**
+     * Parses PGN header tags from text.
+     * Tags are in format [TagName "Value"].
+     * 
+     * @param text The PGN text to parse
+     * @return Map of tag names to their values
+     */
     public Map<String, String> parseTags(String text) {
         Map<String, String> tags = new LinkedHashMap<>();
         Matcher m = TAG_PATTERN.matcher(text);
@@ -30,6 +37,13 @@ public class PGNParser {
         return tags;
     }
 
+    /**
+     * Extracts move tokens from PGN text.
+     * Removes tags, comments, variations, and move numbers.
+     * 
+     * @param text The PGN text to parse
+     * @return List of SAN move strings
+     */
     public List<String> parseMoves(String text) {
         // Remove tags
         String noTags = text.replaceAll("(?s)\\[.*?\\]", " ");
@@ -53,6 +67,12 @@ public class PGNParser {
         return moves;
     }
 
+    /**
+     * Parses complete PGN text into tags and moves.
+     * 
+     * @param text The PGN text to parse
+     * @return Map containing "tags" and "moves" entries
+     */
     public Map<String, Object> parsePGN(String text) {
         Map<String, Object> out = new HashMap<>();
         out.put("tags", parseTags(text));
@@ -61,7 +81,11 @@ public class PGNParser {
     }
 
     /**
-     * Load PGN moves onto a board starting from the initial position.
+     * Loads PGN moves onto a board starting from the initial position.
+     * 
+     * @param board The board to load moves onto
+     * @param pgnText The PGN text containing the moves
+     * @return true if all moves were successfully loaded
      */
     public boolean loadToBoard(Board board, String pgnText) {
         setupInitialPosition(board);
@@ -81,6 +105,10 @@ public class PGNParser {
         return true;
     }
 
+    /**
+     * Prints a text representation of the board for debugging.
+     * @param board The board to print
+     */
     private void printBoard(Board board) {
         System.out.println("  a b c d e f g h");
         for (int r = 7; r >= 0; r--) {
@@ -107,7 +135,10 @@ public class PGNParser {
     }
 
     /**
-     * Set up the standard chess starting position.
+     * Sets up the standard chess starting position on the board.
+     * Clears the board first, then places all 32 pieces in their initial squares.
+     * 
+     * @param board The board to set up
      */
     public void setupInitialPosition(Board board) {
         for (int r = 0; r < 8; r++) {
@@ -142,8 +173,14 @@ public class PGNParser {
     }
 
     /**
-     * Resolve a SAN string to a concrete Move.
-     * Handles: pieces, pawns, captures, promotions, castling, disambiguation.
+     * Resolves a Standard Algebraic Notation (SAN) string to a concrete Move object.
+     * Handles all types of moves including: piece moves, pawn moves, captures,
+     * promotions, castling, and disambiguation (file/rank specifiers).
+     * 
+     * @param board The current board state
+     * @param san The SAN move string (e.g., "Nf3", "e4", "O-O", "exd5", "e8=Q")
+     * @param color The color of the player making the move
+     * @return The resolved Move object, or null if the SAN cannot be resolved
      */
     public Move resolveSAN(Board board, String san, Color color) {
         if (san == null || san.isEmpty()) return null;
@@ -241,6 +278,9 @@ public class PGNParser {
         return null;
     }
 
+    /**
+     * Helper class to store candidate moves during SAN resolution.
+     */
     private static class CandidateMove {
         Square from, to;
         PieceType promotion;
@@ -251,6 +291,14 @@ public class PGNParser {
         }
     }
 
+    /**
+     * Resolves a castling move to a concrete Move object.
+     * 
+     * @param board The current board state
+     * @param color The color of the player castling
+     * @param kingside true for kingside castling (O-O), false for queenside (O-O-O)
+     * @return The castling Move, or null if the king is not found
+     */
     private Move resolveCastling(Board board, Color color, boolean kingside) {
         int rank = (color == Color.WHITE) ? 0 : 7;
         // Find king
@@ -264,6 +312,11 @@ public class PGNParser {
         return null;
     }
 
+    /**
+     * Converts a character to its corresponding PieceType.
+     * @param c The character (K, Q, R, B, N, P)
+     * @return The corresponding PieceType, or null if invalid
+     */
     private PieceType charToPieceType(char c) {
         return switch (c) {
             case 'K' -> PieceType.KING;
@@ -277,8 +330,15 @@ public class PGNParser {
     }
 
     /**
-     * Check if a piece can geometrically reach from 'from' to 'to'.
-     * This checks piece movement rules and path clearance.
+     * Checks if a piece can geometrically reach from one square to another.
+     * Validates piece movement rules and checks for path obstructions.
+     * 
+     * @param board The current board state
+     * @param piece The piece attempting to move
+     * @param from The starting square
+     * @param to The destination square
+     * @param color The color of the moving piece
+     * @return true if the piece can legally reach the destination
      */
     private boolean canReach(Board board, Piece piece, Square from, Square to, Color color) {
         int fx = from.getFile(), fy = from.getRank();
@@ -340,6 +400,15 @@ public class PGNParser {
         return false;
     }
 
+    /**
+     * Checks if a square is a valid en passant target.
+     * 
+     * @param board The current board state
+     * @param from The capturing pawn's square
+     * @param to The target capture square
+     * @param color The color of the capturing pawn
+     * @return true if en passant capture is valid
+     */
     private boolean isEnPassantTarget(Board board, Square from, Square to, Color color) {
         Move lastMove = board.getLastMove();
         if (lastMove == null) return false;
@@ -363,6 +432,15 @@ public class PGNParser {
         return to.getFile() == lmTo.getFile() && to.getRank() == passedRank;
     }
 
+    /**
+     * Checks if the path between two squares is clear of pieces.
+     * Works for horizontal, vertical, and diagonal paths.
+     * 
+     * @param board The current board state
+     * @param from The starting square
+     * @param to The destination square
+     * @return true if no pieces block the path
+     */
     private boolean isPathClear(Board board, Square from, Square to) {
         int fx = from.getFile(), fy = from.getRank();
         int tx = to.getFile(), ty = to.getRank();
@@ -379,7 +457,13 @@ public class PGNParser {
     }
 
     /**
-     * Check if making a move would leave the moving side's king in check.
+     * Checks if making a move would leave the moving side's king in check.
+     * Used to filter out illegal moves during SAN resolution.
+     * 
+     * @param board The current board state
+     * @param move The move to test
+     * @param color The color of the moving player
+     * @return true if the move would leave the king in check (illegal)
      */
     private boolean leavesKingInCheck(Board board, Move move, Color color) {
         // Clone board
@@ -587,6 +671,13 @@ public class PGNParser {
         };
     }
 
+    /**
+     * Reads the contents of a file into a String.
+     * 
+     * @param p The path to the file to read
+     * @return The file contents as a String
+     * @throws IOException if the file cannot be read
+     */
     public static String readFile(Path p) throws IOException {
         return Files.readString(p);
     }

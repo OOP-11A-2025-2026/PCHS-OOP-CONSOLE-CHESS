@@ -2,8 +2,20 @@ package cli;
 import enums.Color;
 import pieces.Piece;
 
+/**
+ * Utility class for rendering chess pieces as text symbols.
+ * Uses uppercase letters for White pieces and lowercase for Black pieces.
+ */
 public final class PieceRenderer {
 
+    /**
+     * Converts a piece to its single-character symbol representation.
+     * White pieces use uppercase (K, Q, R, B, N, P).
+     * Black pieces use lowercase (k, q, r, b, n, p).
+     * 
+     * @param piece The piece to render
+     * @return Single character representing the piece
+     */
     public static char toSymbol(Piece piece) {
         // Using letters: UPPERCASE = White, lowercase = Black
         return switch (piece.getType()) {
